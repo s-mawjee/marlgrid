@@ -1,6 +1,6 @@
 from ..base import MultiGridEnv
 
-from .empty import EmptyMultiGrid
+from .empty import EmptyMultiGrid, EmptyColorMultiGrid
 from .doorkey import DoorKeyEnv
 from .cluttered import ClutteredMultiGrid
 from .goalcycle import ClutteredGoalCycleEnv
@@ -130,17 +130,6 @@ register_marl_env(
     }
 )
 
-register_marl_env(
-    "MarlGrid-3AgentComms15x15-v0",
-    HallWaysMultiGrid,
-    n_agents=3,
-    grid_size=15,
-    view_size=7,
-    env_kwargs={
-        'goal_coordinates': [(1, 1), (1, 12), (1, 13)],
-        'agent_coordinates': [(7, 2), (8, 2), (9, 2)],
-    },
-)
 
 register_marl_env(
     "MarlGrid-2AgentComms15x15-v0",
@@ -153,6 +142,22 @@ register_marl_env(
         'goal_colors': ['blue', 'red', 'blue', 'red'],
         'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
         'max_steps': 1000
+    },
+    agent_color='green',
+)
+
+
+register_marl_env(
+    "MarlGrid-2AgentEmptyColor15x15-v0",
+    EmptyColorMultiGrid,
+    n_agents=2,
+    grid_size=15,
+    view_size=7,
+    env_kwargs={
+        'goal_coordinates': [(7, 1), (8, 1), (8, 13), (7, 13)],
+        'goal_colors': ['blue', 'red', 'blue', 'red'],
+        'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
+        'max_steps': 100
     },
     agent_color='green',
 )
