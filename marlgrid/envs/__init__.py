@@ -5,6 +5,7 @@ from .doorkey import DoorKeyEnv
 from .cluttered import ClutteredMultiGrid
 from .goalcycle import ClutteredGoalCycleEnv
 from .viz_test import VisibilityTestEnv
+from .hallways import HallWaysMultiGrid
 
 from ..agents import GridAgentInterface
 from gym.envs.registration import register as gym_register
@@ -77,6 +78,15 @@ register_marl_env(
 )
 
 register_marl_env(
+    "MarlGrid-2AgentCluttered15x15-v0",
+    ClutteredMultiGrid,
+    n_agents=2,
+    grid_size=11,
+    view_size=5,
+    env_kwargs={'n_clutter':30}
+)
+
+register_marl_env(
     "MarlGrid-3AgentCluttered11x11-v0",
     ClutteredMultiGrid,
     n_agents=3,
@@ -119,3 +129,33 @@ register_marl_env(
         'n_bonus_tiles': 3
     }
 )
+
+register_marl_env(
+    "MarlGrid-3AgentComms15x15-v0",
+    HallWaysMultiGrid,
+    n_agents=3,
+    grid_size=15,
+    view_size=7,
+    env_kwargs={
+        'goal_coordinates': [(1, 1), (1, 12), (1, 13)],
+        'agent_coordinates': [(7, 2), (8, 2), (9, 2)],
+    },
+)
+
+register_marl_env(
+    "MarlGrid-2AgentComms15x15-v0",
+    HallWaysMultiGrid,
+    n_agents=2,
+    grid_size=15,
+    view_size=7,
+    env_kwargs={
+        'goal_coordinates': [(1, 1), (1, 13), (13, 13), (13, 1)],
+        'goal_colors': ['blue', 'red', 'blue', 'red'],
+        'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
+        'max_steps': 1000
+    },
+    agent_color='green',
+)
+
+
+

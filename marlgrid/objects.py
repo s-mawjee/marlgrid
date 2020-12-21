@@ -220,10 +220,31 @@ class Goal(WorldObj):
         return self.reward
 
     def str_render(self, dir=0):
-        return "GG"
+        return "CG"
 
     def render(self, img):
         fill_coords(img, point_in_rect(0, 1, 0, 1), COLORS[self.color])
+
+class ColorGoal(WorldObj):
+    def __init__(self, reward, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reward = reward
+
+    def can_overlap(self):
+        return True
+
+    def get_color(self, agent):
+        return self.color
+
+    def get_reward(self, agent):
+        return 0
+
+    def str_render(self, dir=0):
+        return "CG"
+
+    def render(self, img):
+        fill_coords(img, point_in_rect(0, 1, 0, 1), COLORS[self.color])
+
 
 
 class Floor(WorldObj):
