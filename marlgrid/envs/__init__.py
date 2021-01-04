@@ -58,13 +58,13 @@ def register_marl_env(
 
 def env_from_config(env_config, randomize_seed=True):
     possible_envs = {k:v for k,v in globals().items() if inspect.isclass(v) and issubclass(v, MultiGridEnv)}
-    
+
     env_class = possible_envs[env_config['env_class']]
-    
+
     env_kwargs = {k:v for k,v in env_config.items() if k != 'env_class'}
     if randomize_seed:
         env_kwargs['seed'] = env_kwargs.get('seed', 0) + random.randint(0, 1337*1337)
-    
+
     return env_class(**env_kwargs)
 
 
@@ -117,9 +117,9 @@ register_marl_env(
 )
 
 register_marl_env(
-    "Goalcycle-demo-solo-v0", 
-    ClutteredGoalCycleEnv, 
-    n_agents=1, 
+    "Goalcycle-demo-solo-v0",
+    ClutteredGoalCycleEnv,
+    n_agents=1,
     grid_size=13,
     view_size=7,
     view_tile_size=5,
@@ -138,10 +138,13 @@ register_marl_env(
     grid_size=15,
     view_size=7,
     env_kwargs={
+        'respawn': False,
+        'ghost_mode': False,
+        'reward_decay': False,
         'goal_coordinates': [(1, 1), (1, 13), (13, 13), (13, 1)],
         'goal_colors': ['blue', 'red', 'blue', 'red'],
         'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
-        'max_steps': 1000
+        'max_steps': 250
     },
     agent_color='green',
 )
@@ -154,10 +157,13 @@ register_marl_env(
     grid_size=15,
     view_size=7,
     env_kwargs={
+        'respawn': False,
+        'ghost_mode': False,
+        'reward_decay': False,
         'goal_coordinates': [(7, 1), (8, 1), (8, 13), (7, 13)],
         'goal_colors': ['blue', 'red', 'blue', 'red'],
         'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
-        'max_steps': 100
+        'max_steps': 250
     },
     agent_color='green',
 )
