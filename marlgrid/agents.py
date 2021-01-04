@@ -54,7 +54,7 @@ class GridAgentInterface(GridAgent):
         if self.prestige_beta > 1:
             # warnings.warn("prestige_beta must be between 0 and 1. Using default 0.99")
             self.prestige_beta = 0.95
-            
+
         image_space = gym.spaces.Box(
             low=0,
             high=255,
@@ -97,7 +97,7 @@ class GridAgentInterface(GridAgent):
         red = np.array([255,0,0])
 
         if self.color == 'prestige':
-            # Compute a scaled prestige value between 0 and 1 that will be used to 
+            # Compute a scaled prestige value between 0 and 1 that will be used to
             #   interpolate between the low-prestige (red) and high-prestige (blue)
             #   colors.
             if self.allow_negative_prestige:
@@ -159,6 +159,7 @@ class GridAgentInterface(GridAgent):
         self.active = False
 
     def reset(self, new_episode=False):
+        self.on_color = None
         self.done = False
         self.active = False
         self.pos = None
@@ -208,7 +209,7 @@ class GridAgentInterface(GridAgent):
         dx, dy = self.dir_vec
         rx, ry = self.right_vec
 
-        
+
         ax -= 2*self.view_offset*dx
         ay -= 2*self.view_offset*dy
 
@@ -229,7 +230,7 @@ class GridAgentInterface(GridAgent):
 
         return vx, vy
 
-        
+
     def get_view_pos(self):
         return (self.view_size // 2, self.view_size - 1 - self.view_offset)
 
@@ -293,7 +294,7 @@ class GridAgentInterface(GridAgent):
             return occlude_mask(~opacity_grid, self.get_view_pos())
         else:
             return np.full(opacity_grid.shape, 1, dtype=np.bool)
-    
+
 
 @numba.njit
 def occlude_mask(grid, agent_pos):
@@ -312,7 +313,7 @@ def occlude_mask(grid, agent_pos):
                         mask[i + 1, j - 1] = True
 
         for i in range(agent_pos[0]+1,0,-1):
-            if mask[i,j] and grid[i,j]:    
+            if mask[i,j] and grid[i,j]:
                 if i > 0:
                     mask[i - 1, j] = True
                 if j > 0:
@@ -339,5 +340,5 @@ def occlude_mask(grid, agent_pos):
                     mask[i, j + 1] = True
                     if i > 0:
                         mask[i - 1, j + 1] = True
-                    
+
     return mask
