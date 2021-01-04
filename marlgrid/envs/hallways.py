@@ -42,7 +42,6 @@ class HallWaysMultiGrid(MultiGridEnv):
         assert len(actions) == len(self.agents)
 
         step_rewards = np.zeros((len(self.agents, )), dtype=np.float)
-        reward_colors = []
 
         self.step_count += 1
 
@@ -105,21 +104,14 @@ class HallWaysMultiGrid(MultiGridEnv):
 
                         # After moving, the agent shouldn't contain any other agents.
                         agent.agents = []
-                        # test_integrity(f"After moving {agent.color} fellow")
-
-                        # Rewards can be got iff. fwd_cell has a "get_reward" method
-                        # if hasattr(fwd_cell, 'get_reward'):
-                        #     rwd = fwd_cell.get_reward(agent)
-                        #     if bool(self.reward_decay):
-                        #         rwd *= (1.0 - 0.9 * (self.step_count / self.max_steps))
-                        #     step_rewards[agent_no] += rwd
-                        #     agent.reward(rwd)
-                        if hasattr(fwd_cell, 'get_color'):
-                            color = fwd_cell.get_color(agent)
-                            reward_colors.append(color)
-
                         if isinstance(fwd_cell, (Lava, Goal)):
                             agent.done = True
+
+                        if hasattr(fwd_cell, 'get_color'):
+                            color = fwd_cell.get_color(agent)
+                            agent.on_color = color
+                        else:
+                            agent.on_color = None
 
                 # TODO: verify pickup/drop/toggle logic in an environment that
                 #  supports the relevant interactions.
@@ -158,6 +150,21 @@ class HallWaysMultiGrid(MultiGridEnv):
 
                 agent.on_step(fwd_cell if agent_moved else None)
 
+        obs = [self.gen_agent_obs(agent) for agent in self.agents]
+
+        reward_colors = [a.on_color for a in self.agents if a.on_color]
+
+        # Agents get equal rewards if they are all on the same coloured block
+        if len(reward_colors) == self.num_agents:
+            if all(x == reward_colors[0] for x in reward_colors):
+                rwd = 1
+                if bool(self.reward_decay):
+                    rwd *= (1.0 - 0.9 * (self.step_count / self.max_steps))
+                step_rewards[:] += rwd
+                for agent in self.agents:
+                    agent.reward(rwd)
+                    agent.done = True
+
         # If any of the agents individually are "done" (hit lava or in some cases a goal)
         #   but the env requires respawning, then respawn those agents.
         for agent in self.agents:
@@ -183,18 +190,6 @@ class HallWaysMultiGrid(MultiGridEnv):
 
         # The episode overall is done if all the agents are done, or if it exceeds the step limit.
         done = (self.step_count >= self.max_steps) or all([agent.done for agent in self.agents])
-
-        obs = [self.gen_agent_obs(agent) for agent in self.agents]
-
-        # Agents get equal rewards if they are all on the same coloured block
-        if len(reward_colors) == len(step_rewards):
-            if all(x == reward_colors[0] for x in reward_colors):
-                rwd = 1
-                if bool(self.reward_decay):
-                    rwd *= (1.0 - 0.9 * (self.step_count / self.max_steps))
-                step_rewards[:] += rwd
-                for agent in self.agents:
-                    agent.reward(rwd)
 
         return obs, step_rewards, done, {}
 
