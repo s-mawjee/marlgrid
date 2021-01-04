@@ -6,9 +6,8 @@ class HallWaysMultiGrid(MultiGridEnv):
     mission = "get to the square with the same color as the agent"
     metadata = {}
 
-    def __init__(self, *args, goal_coordinates, goal_colors, agent_coordinates, **kwargs):
+    def __init__(self, *args, goal_coordinates, goal_colors, **kwargs):
         self.goal_coordinates = goal_coordinates
-        self.agent_coordinates = agent_coordinates
         self.goal_colors = goal_colors
         # Need to do checks that they are the same length
         super().__init__(*args, **kwargs)

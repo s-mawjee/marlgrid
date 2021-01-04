@@ -143,7 +143,6 @@ register_marl_env(
         'reward_decay': False,
         'goal_coordinates': [(1, 1), (1, 13), (13, 13), (13, 1)],
         'goal_colors': ['blue', 'red', 'blue', 'red'],
-        'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
         'max_steps': 250
     },
     agent_color='green',
@@ -162,7 +161,6 @@ register_marl_env(
         'reward_decay': False,
         'goal_coordinates': [(7, 1), (8, 1), (8, 13), (7, 13)],
         'goal_colors': ['blue', 'red', 'blue', 'red'],
-        'agent_coordinates': [(1, 7, 0), (13, 7, 2)],  # (x, y, direction)
         'max_steps': 250
     },
     agent_color='green',

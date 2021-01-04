@@ -21,9 +21,8 @@ class EmptyColorMultiGrid(MultiGridEnv):
     mission = "all agents get to the same coloured square"
     metadata = {}
 
-    def __init__(self, *args, goal_coordinates, goal_colors, agent_coordinates, **kwargs):
+    def __init__(self, *args, goal_coordinates, goal_colors, **kwargs):
         self.goal_coordinates = goal_coordinates
-        self.agent_coordinates = agent_coordinates
         self.goal_colors = goal_colors
         # Need to do checks that they are the same length
         super().__init__(*args, **kwargs)
@@ -199,25 +198,3 @@ class EmptyColorMultiGrid(MultiGridEnv):
             [agent.done for agent in self.agents])
 
         return obs, step_rewards, done, {}
-
-
-    def reset(self, **kwargs):
-        for agent in self.agents:
-            agent.agents = []
-            agent.reset(new_episode=True)
-
-        self._gen_grid(self.width, self.height)
-
-        for i, agent in enumerate(self.agents):
-            if agent.spawn_delay == 0:
-                agent.dir = self.agent_coordinates[i][2]
-                self.place_obj(
-                    agent,
-                    top=(self.agent_coordinates[i][0], self.agent_coordinates[i][1]),
-                    size=(1, 1)
-                )
-                agent.activate()
-
-        self.step_count = 0
-        obs = self.gen_obs()
-        return obs
