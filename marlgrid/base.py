@@ -501,10 +501,6 @@ class MultiGridEnv(gym.Env):
             return ret
 
     def get_color_in_view(self, grid_image):
-        import matplotlib.pyplot as plt
-
-        imgplot = plt.imshow(grid_image)
-        plt.show()
         # Check if blue hue is max
         if np.any(np.isin(grid_image[:][:][2], [255])):
             return 2
