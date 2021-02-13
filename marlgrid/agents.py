@@ -12,10 +12,10 @@ class GridAgentInterface(GridAgent):
         left = 0  # Rotate left
         right = 1  # Rotate right
         forward = 2  # Move forward
-        pickup = 3  # Pick up an object
-        drop = 4  # Drop an object
-        toggle = 5  # Toggle/activate an object
-        done = 6  # Done completing task
+        # pickup = 3  # Pick up an object
+        # drop = 4  # Drop an object
+        # toggle = 5  # Toggle/activate an object
+        done = 3  # Done completing task
 
     def __init__(
         self,

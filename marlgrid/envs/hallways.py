@@ -115,30 +115,30 @@ class HallWaysMultiGrid(MultiGridEnv):
                 # TODO: verify pickup/drop/toggle logic in an environment that
                 #  supports the relevant interactions.
                 # Pick up an object
-                elif action == agent.actions.pickup:
-                    if fwd_cell and fwd_cell.can_pickup():
-                        if agent.carrying is None:
-                            agent.carrying = fwd_cell
-                            agent.carrying.cur_pos = np.array([-1, -1])
-                            self.grid.set(*fwd_pos, None)
-                    else:
-                        pass
-
-                # Drop an object
-                elif action == agent.actions.drop:
-                    if not fwd_cell and agent.carrying:
-                        self.grid.set(*fwd_pos, agent.carrying)
-                        agent.carrying.cur_pos = fwd_pos
-                        agent.carrying = None
-                    else:
-                        pass
-
-                # Toggle/activate an object
-                elif action == agent.actions.toggle:
-                    if fwd_cell:
-                        wasted = bool(fwd_cell.toggle(agent, fwd_pos))
-                    else:
-                        pass
+                # elif action == agent.actions.pickup:
+                #     if fwd_cell and fwd_cell.can_pickup():
+                #         if agent.carrying is None:
+                #             agent.carrying = fwd_cell
+                #             agent.carrying.cur_pos = np.array([-1, -1])
+                #             self.grid.set(*fwd_pos, None)
+                #     else:
+                #         pass
+                #
+                # # Drop an object
+                # elif action == agent.actions.drop:
+                #     if not fwd_cell and agent.carrying:
+                #         self.grid.set(*fwd_pos, agent.carrying)
+                #         agent.carrying.cur_pos = fwd_pos
+                #         agent.carrying = None
+                #     else:
+                #         pass
+                #
+                # # Toggle/activate an object
+                # elif action == agent.actions.toggle:
+                #     if fwd_cell:
+                #         wasted = bool(fwd_cell.toggle(agent, fwd_pos))
+                #     else:
+                #         pass
 
                 # Done action (not used by default)
                 elif action == agent.actions.done:

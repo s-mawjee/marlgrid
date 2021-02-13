@@ -39,7 +39,8 @@ class EmptyColorMultiGrid(MultiGridEnv):
     def step(self, actions):
         # Spawn agents if it's time.
         for agent in self.agents:
-            if not agent.active and not agent.done and self.step_count >= agent.spawn_delay:
+            if not agent.active and not agent.done \
+                    and self.step_count >= agent.spawn_delay:
                 self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
 
@@ -121,30 +122,30 @@ class EmptyColorMultiGrid(MultiGridEnv):
                 # TODO: verify pickup/drop/toggle logic in an environment that
                 #  supports the relevant interactions.
                 # Pick up an object
-                elif action == agent.actions.pickup:
-                    if fwd_cell and fwd_cell.can_pickup():
-                        if agent.carrying is None:
-                            agent.carrying = fwd_cell
-                            agent.carrying.cur_pos = np.array([-1, -1])
-                            self.grid.set(*fwd_pos, None)
-                    else:
-                        pass
-
-                # Drop an object
-                elif action == agent.actions.drop:
-                    if not fwd_cell and agent.carrying:
-                        self.grid.set(*fwd_pos, agent.carrying)
-                        agent.carrying.cur_pos = fwd_pos
-                        agent.carrying = None
-                    else:
-                        pass
-
-                # Toggle/activate an object
-                elif action == agent.actions.toggle:
-                    if fwd_cell:
-                        wasted = bool(fwd_cell.toggle(agent, fwd_pos))
-                    else:
-                        pass
+                # elif action == agent.actions.pickup:
+                #     if fwd_cell and fwd_cell.can_pickup():
+                #         if agent.carrying is None:
+                #             agent.carrying = fwd_cell
+                #             agent.carrying.cur_pos = np.array([-1, -1])
+                #             self.grid.set(*fwd_pos, None)
+                #     else:
+                #         pass
+                #
+                # # Drop an object
+                # elif action == agent.actions.drop:
+                #     if not fwd_cell and agent.carrying:
+                #         self.grid.set(*fwd_pos, agent.carrying)
+                #         agent.carrying.cur_pos = fwd_pos
+                #         agent.carrying = None
+                #     else:
+                #         pass
+                #
+                # # Toggle/activate an object
+                # elif action == agent.actions.toggle:
+                #     if fwd_cell:
+                #         wasted = bool(fwd_cell.toggle(agent, fwd_pos))
+                #     else:
+                #         pass
 
                 # Done action (not used by default)
                 elif action == agent.actions.done:
@@ -170,7 +171,8 @@ class EmptyColorMultiGrid(MultiGridEnv):
                     agent.reward(rwd)
                     agent.done = True
 
-        # If any of the agents individually are "done" (hit lava or in some cases a goal)
+        # If any of the agents individually are "done"
+        # (hit lava or in some cases a goal)
         #   but the env requires respawning, then respawn those agents.
         for agent in self.agents:
             if agent.done:
@@ -193,7 +195,8 @@ class EmptyColorMultiGrid(MultiGridEnv):
                 else:  # if the agent shouldn't be respawned, then deactivate it.
                     agent.deactivate()
 
-        # The episode overall is done if all the agents are done, or if it exceeds the step limit.
+        # The episode overall is done if all the agents are done, or
+        # if it exceeds the step limit.
         done = (self.step_count >= self.max_steps) or all(
             [agent.done for agent in self.agents])
 
