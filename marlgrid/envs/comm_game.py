@@ -1,13 +1,15 @@
 from ..base import MultiGridEnv, MultiGrid
 from ..objects import *
+import numpy as np
 
 
 class CommunicationGameEnv(MultiGridEnv):
-    mission = "share visualable information with other agent."
+    mission = "share visible information with other agent."
     metadata = {}
 
     def __init__(
-        self, *args, block_coordinates, block_colors, comm_blocks_coordinates, **kwargs
+            self, *args, block_coordinates, block_colors, comm_blocks_coordinates,
+            **kwargs
     ):
         assert len(block_coordinates) == 4
         assert len(block_colors) == 4
@@ -15,17 +17,14 @@ class CommunicationGameEnv(MultiGridEnv):
         self.block_coordinates = block_coordinates
         self.block_colors = block_colors
 
-        # Top section "goal" block index, 0 or 1
-        self.goal_blocks_top_index = 0
-        # Bottom section "goal" block index, 2 or 3
-        self.goal_blocks_bottom_index = 2
-
         self.comm_blocks_top_coordinates = comm_blocks_coordinates[0]
         self.comm_blocks_bottom_coordinates = comm_blocks_coordinates[1]
 
         super().__init__(*args, **kwargs)
 
     def _gen_grid(self, width, height):
+        self.__set_random_comm_block_color()
+
         self.grid = MultiGrid((width, height))
         self.grid.wall_rect(0, 0, width, height)
 
@@ -60,21 +59,61 @@ class CommunicationGameEnv(MultiGridEnv):
         for i in range(self.grid.width):
             self.put_obj(Wall(), i, self.corridor_middle_coord)
 
-        self.agent_spawn_kwargs = {}
+        self.agent_spawn_kwargs = {
+        }
+
+    def __set_random_comm_block_color(self):
+        # Want agents to comm the color block there see,
+        # hence it's not the same color as there blocks
+
+        # Top section "goal" block index, 2 or 3
+        self.goal_blocks_top_index = np.random.randint(low=2, high=4, size=1)[0]
+        # Bottom section "goal" block index, 0 or 1
+        self.goal_blocks_bottom_index = np.random.randint(low=0, high=2, size=1)[0]
+
+    def reset(self, **kwargs):
+        for agent in self.agents:
+            agent.agents = []
+            agent.reset(new_episode=True)
+
+        self._gen_grid(self.width, self.height)
+
+        for i, agent in enumerate(self.agents):
+            if agent.spawn_delay == 0:
+                # TODO: make generic for more than 2 agents and not just split into two
+                # Assuming agent 0 is on top
+                if i == 0:
+                    self.place_obj(agent, bottom_=(
+                        (self.width // 2 - 1), (self.height // 2) - 1),
+                                   size=(1, 1))
+                elif i == 1:
+                    self.place_obj(agent,
+                                   top=((self.width // 2 + 1), (self.height // 2 + 1)),
+                                   size=(1, 1))
+                else:
+                    self.place_obj(agent, **self.agent_spawn_kwargs)
+                agent.activate()
+
+        self.step_count = 0
+        obs = self.gen_obs()
+        return obs
+
+    def get_color_in_view(self, grid_image):
+        return 0
 
     def step(self, actions):
         for agent in self.agents:
             if (
-                not agent.active
-                and not agent.done
-                and self.step_count >= agent.spawn_delay
+                    not agent.active
+                    and not agent.done
+                    and self.step_count >= agent.spawn_delay
             ):
                 self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
 
         assert len(actions) == len(self.agents)
 
-        step_rewards = np.zeros((len(self.agents,)), dtype=np.float)
+        step_rewards = np.zeros((len(self.agents, )), dtype=np.float)
 
         self.step_count += 1
 

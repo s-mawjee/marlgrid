@@ -6,6 +6,7 @@ from .cluttered import ClutteredMultiGrid
 from .goalcycle import ClutteredGoalCycleEnv
 from .viz_test import VisibilityTestEnv
 from .hallways import HallWaysMultiGrid
+from .comm_game import CommunicationGameEnv
 
 from ..agents import GridAgentInterface
 from gym.envs.registration import register as gym_register
@@ -19,15 +20,15 @@ registered_envs = []
 
 
 def register_marl_env(
-    env_name,
-    env_class,
-    n_agents,
-    grid_size,
-    view_size,
-    view_tile_size=8,
-    view_offset=0,
-    agent_color=None,
-    env_kwargs={},
+        env_name,
+        env_class,
+        n_agents,
+        grid_size,
+        view_size,
+        view_tile_size=8,
+        view_offset=0,
+        agent_color=None,
+        env_kwargs={},
 ):
     colors = ["red", "blue", "purple", "orange", "olive", "pink"]
     assert n_agents <= len(colors)
@@ -42,7 +43,7 @@ def register_marl_env(
                         view_size=view_size,
                         view_tile_size=8,
                         view_offset=view_offset,
-                        )
+                    )
                     for c in colors[:n_agents]
                 ],
                 grid_size=grid_size,
@@ -57,13 +58,17 @@ def register_marl_env(
 
 
 def env_from_config(env_config, randomize_seed=True):
-    possible_envs = {k:v for k,v in globals().items() if inspect.isclass(v) and issubclass(v, MultiGridEnv)}
+    possible_envs = {
+        k: v
+        for k, v in globals().items()
+        if inspect.isclass(v) and issubclass(v, MultiGridEnv)
+    }
 
-    env_class = possible_envs[env_config['env_class']]
+    env_class = possible_envs[env_config["env_class"]]
 
-    env_kwargs = {k:v for k,v in env_config.items() if k != 'env_class'}
+    env_kwargs = {k: v for k, v in env_config.items() if k != "env_class"}
     if randomize_seed:
-        env_kwargs['seed'] = env_kwargs.get('seed', 0) + random.randint(0, 1337*1337)
+        env_kwargs["seed"] = env_kwargs.get("seed", 0) + random.randint(0, 1337 * 1337)
 
     return env_class(**env_kwargs)
 
@@ -74,7 +79,7 @@ register_marl_env(
     n_agents=1,
     grid_size=11,
     view_size=5,
-    env_kwargs={'n_clutter':30}
+    env_kwargs={"n_clutter": 30},
 )
 
 register_marl_env(
@@ -83,7 +88,7 @@ register_marl_env(
     n_agents=2,
     grid_size=11,
     view_size=5,
-    env_kwargs={'n_clutter':30}
+    env_kwargs={"n_clutter": 30},
 )
 
 register_marl_env(
@@ -92,7 +97,7 @@ register_marl_env(
     n_agents=3,
     grid_size=11,
     view_size=7,
-    env_kwargs={'clutter_density':0.15}
+    env_kwargs={"clutter_density": 0.15},
 )
 
 register_marl_env(
@@ -101,7 +106,7 @@ register_marl_env(
     n_agents=3,
     grid_size=15,
     view_size=7,
-    env_kwargs={'clutter_density':0.15}
+    env_kwargs={"clutter_density": 0.15},
 )
 
 register_marl_env(
@@ -124,12 +129,8 @@ register_marl_env(
     view_size=7,
     view_tile_size=5,
     view_offset=1,
-    env_kwargs={
-        'clutter_density':0.1,
-        'n_bonus_tiles': 3
-    }
+    env_kwargs={"clutter_density": 0.1, "n_bonus_tiles": 3},
 )
-
 
 register_marl_env(
     "MarlGrid-2AgentComms15x15-v0",
@@ -138,16 +139,15 @@ register_marl_env(
     grid_size=15,
     view_size=7,
     env_kwargs={
-        'respawn': False,
-        'ghost_mode': False,
-        'reward_decay': False,
-        'goal_coordinates': [(1, 1), (1, 13), (13, 13), (13, 1)],
-        'goal_colors': ['blue', 'red', 'blue', 'red'],
-        'max_steps': 250
+        "respawn": False,
+        "ghost_mode": False,
+        "reward_decay": False,
+        "goal_coordinates": [(1, 1), (1, 13), (13, 13), (13, 1)],
+        "goal_colors": ["blue", "red", "blue", "red"],
+        "max_steps": 250,
     },
-    agent_color='green',
+    agent_color="green",
 )
-
 
 register_marl_env(
     "MarlGrid-2AgentEmptyColor15x15-v0",
@@ -156,15 +156,30 @@ register_marl_env(
     grid_size=15,
     view_size=7,
     env_kwargs={
-        'respawn': False,
-        'ghost_mode': False,
-        'reward_decay': False,
-        'goal_coordinates': [(7, 1), (8, 1), (8, 13), (7, 13)],
-        'goal_colors': ['blue', 'red', 'blue', 'red'],
-        'max_steps': 250
+        "respawn": False,
+        "ghost_mode": False,
+        "reward_decay": False,
+        "goal_coordinates": [(7, 1), (8, 1), (8, 13), (7, 13)],
+        "goal_colors": ["blue", "red", "blue", "red"],
+        "max_steps": 250,
     },
-    agent_color='green',
+    agent_color="green",
 )
 
-
-
+register_marl_env(
+    "MarlGrid-2AgentCommGame15x15-v0",
+    CommunicationGameEnv,
+    n_agents=2,
+    grid_size=15,
+    view_size=7,
+    env_kwargs={
+        "respawn": False,
+        "ghost_mode": False,
+        "reward_decay": False,
+        "block_coordinates": [(1, 1), (13, 1), (1, 13), (13, 13)],
+        "block_colors": ["blue", "red", "cyan", "pink"],
+        "comm_blocks_coordinates": [(7, 4), (7, 10)],
+        "max_steps": 250,
+    },
+    agent_color="green",
+)
