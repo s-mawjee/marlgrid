@@ -5,7 +5,7 @@ from ..objects import *
 class DoorKeyEnv(MultiGridEnv):
     """
     Environment with a door and key, sparse reward.
-    Similar to DoorKeyEnv in 
+    Similar to DoorKeyEnv in
         https://github.com/maximecb/gym-minigrid/blob/master/gym_minigrid/envs/doorkey.py
     """
 

@@ -8,8 +8,7 @@ class CommunicationGameEnv(MultiGridEnv):
     metadata = {}
 
     def __init__(
-            self, *args, block_coordinates, block_colors, comm_blocks_coordinates,
-            **kwargs
+        self, *args, block_coordinates, block_colors, comm_blocks_coordinates, **kwargs
     ):
         assert len(block_coordinates) == 4
         assert len(block_colors) == 4
@@ -43,7 +42,8 @@ class CommunicationGameEnv(MultiGridEnv):
         for i, (x, y) in enumerate(self.block_coordinates):
             self.put_obj(
                 ColorGoal(color=self.block_colors[i], reward=self.__get_goal_reward(i)),
-                x, y,
+                x,
+                y,
             )
 
         # TODO: Put hallway/door between agent start and goal coordinates
@@ -53,8 +53,7 @@ class CommunicationGameEnv(MultiGridEnv):
         for i in range(self.grid.width):
             self.put_obj(Wall(), i, self.corridor_middle_coord)
 
-        self.agent_spawn_kwargs = {
-        }
+        self.agent_spawn_kwargs = {}
 
     def __get_goal_reward(self, goal_index):
         if goal_index in [self.goal_blocks_top_index, self.goal_blocks_bottom_index]:
@@ -83,13 +82,17 @@ class CommunicationGameEnv(MultiGridEnv):
                 # TODO: make generic for more than 2 agents and not just split into two
                 # Assuming agent 0 is on top
                 if i == 0:
-                    self.place_obj(agent, bottom_=(
-                        (self.width // 2 - 1), (self.height // 2) - 1),
-                                   size=(1, 1))
+                    self.place_obj(
+                        agent,
+                        bottom_=((self.width // 2 - 1), (self.height // 2) - 1),
+                        size=(1, 1),
+                    )
                 elif i == 1:
-                    self.place_obj(agent,
-                                   top=((self.width // 2 + 1), (self.height // 2 + 1)),
-                                   size=(1, 1))
+                    self.place_obj(
+                        agent,
+                        top=((self.width // 2 + 1), (self.height // 2 + 1)),
+                        size=(1, 1),
+                    )
                 else:
                     self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
@@ -146,16 +149,23 @@ class CommunicationGameEnv(MultiGridEnv):
     def step(self, actions):
         for agent in self.agents:
             if (
-                    not agent.active
-                    and not agent.done
-                    and self.step_count >= agent.spawn_delay
+                not agent.active
+                and not agent.done
+                and self.step_count >= agent.spawn_delay
             ):
                 self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
 
         assert len(actions) == len(self.agents)
 
-        step_rewards = np.zeros((len(self.agents, )), dtype=np.float)
+        step_rewards = np.zeros(
+            (
+                len(
+                    self.agents,
+                )
+            ),
+            dtype=np.float,
+        )
 
         self.step_count += 1
 
@@ -268,8 +278,10 @@ class CommunicationGameEnv(MultiGridEnv):
 
                 agent.on_step(fwd_cell if agent_moved else None)
 
-        obs = [self.gen_agent_obs(agent, agent_index=i) for i, agent in
-               enumerate(self.agents)]
+        obs = [
+            self.gen_agent_obs(agent, agent_index=i)
+            for i, agent in enumerate(self.agents)
+        ]
 
         # If any of the agents individually are "done" (hit lava or in some cases a goal)
         #   but the env requires respawning, then respawn those agents.

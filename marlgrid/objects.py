@@ -51,7 +51,9 @@ class WorldObj(metaclass=RegisteredObjectType):
         self.state = state
         self.contains = None
 
-        self.agents = []  # Some objects can have agents on top (e.g. floor, open doors, etc).
+        self.agents = (
+            []
+        )  # Some objects can have agents on top (e.g. floor, open doors, etc).
 
         self.pos_init = None
         self.pos = None
@@ -96,10 +98,14 @@ class WorldObj(metaclass=RegisteredObjectType):
         # # if len(self.agents)>0:
         # #     return self.agents[0].encode(str_class=str_class)
         # # else:
-        enc_class = self.type if bool(str_class) else self.recursive_subclasses().index(
-            self.__class__)
-        enc_color = self.color if isinstance(self.color, int) else COLOR_TO_IDX[
-            self.color]
+        enc_class = (
+            self.type
+            if bool(str_class)
+            else self.recursive_subclasses().index(self.__class__)
+        )
+        enc_color = (
+            self.color if isinstance(self.color, int) else COLOR_TO_IDX[self.color]
+        )
         return (enc_class, enc_color, self.state)
 
     def describe(self):
@@ -126,10 +132,10 @@ class WorldObj(metaclass=RegisteredObjectType):
 
 
 class GridAgent(WorldObj):
-    def __init__(self, *args, color='red', **kwargs):
-        super().__init__(*args, **{'color': color, **kwargs})
+    def __init__(self, *args, color="red", **kwargs):
+        super().__init__(*args, **{"color": color, **kwargs})
         self.metadata = {
-            'color': color,
+            "color": color,
         }
         self.is_agent = True
 
@@ -139,7 +145,7 @@ class GridAgent(WorldObj):
 
     @property
     def type(self):
-        return 'Agent'
+        return "Agent"
 
     @dir.setter
     def dir(self, dir):
@@ -152,7 +158,11 @@ class GridAgent(WorldObj):
         return True
 
     def render(self, img):
-        tri_fn = point_in_triangle((0.12, 0.19), (0.87, 0.50), (0.12, 0.81), )
+        tri_fn = point_in_triangle(
+            (0.12, 0.19),
+            (0.87, 0.50),
+            (0.12, 0.81),
+        )
         tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5 * np.pi * (self.dir))
         fill_coords(img, tri_fn, COLORS[self.color])
 
@@ -167,9 +177,19 @@ class BulkObj(WorldObj, metaclass=RegisteredObjectType):
 
 
 class BonusTile(WorldObj):
-    def __init__(self, reward, penalty=-0.1, bonus_id=0, n_bonus=1, initial_reward=True,
-                 reset_on_mistake=False, color='yellow', *args, **kwargs):
-        super().__init__(*args, **{'color': color, **kwargs, 'state': bonus_id})
+    def __init__(
+        self,
+        reward,
+        penalty=-0.1,
+        bonus_id=0,
+        n_bonus=1,
+        initial_reward=True,
+        reset_on_mistake=False,
+        color="yellow",
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **{"color": color, **kwargs, "state": bonus_id})
         self.reward = reward
         self.penalty = penalty
         self.n_bonus = n_bonus
@@ -362,9 +382,9 @@ class Door(WorldObj):
         if self.state == self.states.locked:  # is locked
             # If the agent is carrying a key of matching color
             if (
-                    agent.carrying is not None
-                    and isinstance(agent.carrying, Key)
-                    and agent.carrying.color == self.color
+                agent.carrying is not None
+                and isinstance(agent.carrying, Key)
+                and agent.carrying.color == self.color
             ):
                 self.state = self.states.closed
         elif self.state == self.states.closed:  # is unlocked but closed

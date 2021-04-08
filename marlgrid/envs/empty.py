@@ -11,10 +11,8 @@ class EmptyMultiGrid(MultiGridEnv):
         self.grid.wall_rect(0, 0, width, height)
         self.put_obj(Goal(color="green", reward=1), width - 2, height - 2)
 
-
         self.agent_spawn_kwargs = {}
         self.place_agents(**self.agent_spawn_kwargs)
-
 
 
 class EmptyColorMultiGrid(MultiGridEnv):
@@ -39,14 +37,24 @@ class EmptyColorMultiGrid(MultiGridEnv):
     def step(self, actions):
         # Spawn agents if it's time.
         for agent in self.agents:
-            if not agent.active and not agent.done \
-                    and self.step_count >= agent.spawn_delay:
+            if (
+                not agent.active
+                and not agent.done
+                and self.step_count >= agent.spawn_delay
+            ):
                 self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
 
         assert len(actions) == len(self.agents)
 
-        step_rewards = np.zeros((len(self.agents, )), dtype=np.float)
+        step_rewards = np.zeros(
+            (
+                len(
+                    self.agents,
+                )
+            ),
+            dtype=np.float,
+        )
 
         self.step_count += 1
 
@@ -113,7 +121,7 @@ class EmptyColorMultiGrid(MultiGridEnv):
                         if isinstance(fwd_cell, (Lava, Goal)):
                             agent.done = True
 
-                        if hasattr(fwd_cell, 'get_color'):
+                        if hasattr(fwd_cell, "get_color"):
                             color = fwd_cell.get_color(agent)
                             agent.on_color = color
                         else:
@@ -156,7 +164,6 @@ class EmptyColorMultiGrid(MultiGridEnv):
 
                 agent.on_step(fwd_cell if agent_moved else None)
 
-
         obs = [self.gen_agent_obs(agent) for agent in self.agents]
 
         reward_colors = [a.on_color for a in self.agents if a.on_color]
@@ -165,7 +172,7 @@ class EmptyColorMultiGrid(MultiGridEnv):
             if all(x == reward_colors[0] for x in reward_colors):
                 rwd = 1
                 if bool(self.reward_decay):
-                    rwd *= (1.0 - 0.9 * (self.step_count / self.max_steps))
+                    rwd *= 1.0 - 0.9 * (self.step_count / self.max_steps)
                 step_rewards[:] += rwd
                 for agent in self.agents:
                     agent.reward(rwd)
@@ -198,6 +205,7 @@ class EmptyColorMultiGrid(MultiGridEnv):
         # The episode overall is done if all the agents are done, or
         # if it exceeds the step limit.
         done = (self.step_count >= self.max_steps) or all(
-            [agent.done for agent in self.agents])
+            [agent.done for agent in self.agents]
+        )
 
         return obs, step_rewards, done, {}

@@ -20,15 +20,15 @@ registered_envs = []
 
 
 def register_marl_env(
-        env_name,
-        env_class,
-        n_agents,
-        grid_size,
-        view_size,
-        view_tile_size=8,
-        view_offset=0,
-        agent_color=None,
-        env_kwargs={},
+    env_name,
+    env_class,
+    n_agents,
+    grid_size,
+    view_size,
+    view_tile_size=8,
+    view_offset=0,
+    agent_color=None,
+    env_kwargs={},
 ):
     colors = ["red", "blue", "purple", "orange", "olive", "pink"]
     assert n_agents <= len(colors)

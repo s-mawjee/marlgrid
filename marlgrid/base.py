@@ -142,7 +142,7 @@ class MultiGrid:
         x_offset = x_min - topX
         y_offset = y_min - topY
         sub_grid.grid[
-        x_offset: x_max - x_min + x_offset, y_offset: y_max - y_min + y_offset
+            x_offset : x_max - x_min + x_offset, y_offset : y_max - y_min + y_offset
         ] = self.grid[x_min:x_max, y_min:y_max]
 
         sub_grid.grid = rotate_grid(sub_grid.grid, rot_k)
@@ -188,14 +188,14 @@ class MultiGrid:
         )
         hstars = "*" * (2 * self.width + 2)
         return (
-                hstars
-                + "\n"
-                + "\n".join(
-            "*" + "".join(render(self.get(i, j)) for i in range(self.width)) + "*"
-            for j in range(self.height)
-        )
-                + "\n"
-                + hstars
+            hstars
+            + "\n"
+            + "\n".join(
+                "*" + "".join(render(self.get(i, j)) for i in range(self.width)) + "*"
+                for j in range(self.height)
+            )
+            + "\n"
+            + hstars
         )
 
     def encode(self, vis_mask=None):
@@ -315,8 +315,8 @@ class MultiGrid:
         height_px = self.height * tile_size
 
         img = (
-                np.zeros(shape=(height_px, width_px), dtype=np.uint8)[..., None]
-                + COLORS["shadow"]
+            np.zeros(shape=(height_px, width_px), dtype=np.uint8)[..., None]
+            + COLORS["shadow"]
         )
 
         for j in range(0, self.height):
@@ -344,8 +344,8 @@ class MultiGrid:
             ]  # arcane magic.
             img = (
                 np.right_shift(img.astype(np.uint16) * 8 + hm * 2, 3)
-                    .clip(0, 255)
-                    .astype(np.uint8)
+                .clip(0, 255)
+                .astype(np.uint8)
             )
 
         return img
@@ -353,17 +353,17 @@ class MultiGrid:
 
 class MultiGridEnv(gym.Env):
     def __init__(
-            self,
-            agents=[],
-            grid_size=None,
-            width=None,
-            height=None,
-            max_steps=100,
-            reward_decay=True,
-            seed=1337,
-            respawn=False,
-            ghost_mode=True,
-            agent_spawn_kwargs={},
+        self,
+        agents=[],
+        grid_size=None,
+        width=None,
+        height=None,
+        max_steps=100,
+        reward_decay=True,
+        seed=1337,
+        respawn=False,
+        ghost_mode=True,
+        agent_spawn_kwargs={},
     ):
 
         if grid_size is not None:
@@ -463,17 +463,18 @@ class MultiGridEnv(gym.Env):
                 for j in range(grid.height):
                     item = grid.get(i, j)
                     if (
-                            (item is not None)
-                            and (item is not agent)
-                            and (item.type in agent.hide_item_types)
+                        (item is not None)
+                        and (item is not agent)
+                        and (item.type in agent.hide_item_types)
                     ):
                         if len(item.agents) > 0:
                             grid.set(i, j, item.agents[0])
                         else:
                             grid.set(i, j, None)
         # for comm game
-        self.comm_block_in_view(agent, (topX, topY), (botX, botY),
-                                agent_index=agent_index)
+        self.comm_block_in_view(
+            agent, (topX, topY), (botX, botY), agent_index=agent_index
+        )
 
         return grid, vis_mask
 
@@ -517,8 +518,10 @@ class MultiGridEnv(gym.Env):
             return 0
 
     def gen_obs(self):
-        return [self.gen_agent_obs(agent, agent_index=i) for i, agent in
-                enumerate(self.agents)]
+        return [
+            self.gen_agent_obs(agent, agent_index=i)
+            for i, agent in enumerate(self.agents)
+        ]
 
     def __str__(self):
         return self.grid.__str__()
@@ -551,16 +554,23 @@ class MultiGridEnv(gym.Env):
         # Spawn agents if it's time.
         for agent in self.agents:
             if (
-                    not agent.active
-                    and not agent.done
-                    and self.step_count >= agent.spawn_delay
+                not agent.active
+                and not agent.done
+                and self.step_count >= agent.spawn_delay
             ):
                 self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
 
         assert len(actions) == len(self.agents)
 
-        step_rewards = np.zeros((len(self.agents, )), dtype=np.float)
+        step_rewards = np.zeros(
+            (
+                len(
+                    self.agents,
+                )
+            ),
+            dtype=np.float,
+        )
 
         self.step_count += 1
 
@@ -701,8 +711,10 @@ class MultiGridEnv(gym.Env):
             [agent.done for agent in self.agents]
         )
 
-        obs = [self.gen_agent_obs(agent, agent_index=i) for i, agent in
-               enumerate(self.agents)]
+        obs = [
+            self.gen_agent_obs(agent, agent_index=i)
+            for i, agent in enumerate(self.agents)
+        ]
 
         return obs, step_rewards, done, {}
 
@@ -716,9 +728,9 @@ class MultiGridEnv(gym.Env):
         return True
 
     def try_place_obj(self, obj, pos):
-        """ Try to place an object at a certain position in the grid.
+        """Try to place an object at a certain position in the grid.
         If it is possible, then do so and return True.
-        Otherwise do nothing and return False. """
+        Otherwise do nothing and return False."""
         # grid_obj: whatever object is already at pos.
         grid_obj = self.grid.get(*pos)
 
@@ -741,8 +753,15 @@ class MultiGridEnv(gym.Env):
         obj.set_position(pos)
         return True
 
-    def place_obj(self, obj, top=(0, 0), size=None, reject_fn=None, max_tries=1e5,
-                  bottom_=(None, None)):
+    def place_obj(
+        self,
+        obj,
+        top=(0, 0),
+        size=None,
+        reject_fn=None,
+        max_tries=1e5,
+        bottom_=(None, None),
+    ):
         max_tries = int(max(1, min(max_tries, 1e5)))
         top = (max(top[0], 0), max(top[1], 0))
         if size is None:
@@ -773,16 +792,16 @@ class MultiGridEnv(gym.Env):
         pass
 
     def render(
-            self,
-            mode="human",
-            close=False,
-            highlight=True,
-            tile_size=TILE_PIXELS,
-            show_agent_views=True,
-            max_agents_per_col=3,
-            agent_col_width_frac=0.3,
-            agent_col_padding_px=2,
-            pad_grey=100,
+        self,
+        mode="human",
+        close=False,
+        highlight=True,
+        tile_size=TILE_PIXELS,
+        show_agent_views=True,
+        max_agents_per_col=3,
+        agent_col_width_frac=0.3,
+        agent_col_padding_px=2,
+        pad_grey=100,
     ):
         """
         Render the whole-grid human view
@@ -810,15 +829,15 @@ class MultiGridEnv(gym.Env):
                 )
                 if agent.see_through_walls:
                     highlight_mask[
-                    xlow + dxlow: xhigh - dxhigh, ylow + dylow: yhigh - dyhigh
+                        xlow + dxlow : xhigh - dxhigh, ylow + dylow : yhigh - dyhigh
                     ] = True
                 else:
                     a, b = self.gen_obs_grid(agent)
                     highlight_mask[
-                    xlow + dxlow: xhigh - dxhigh, ylow + dylow: yhigh - dyhigh
+                        xlow + dxlow : xhigh - dxhigh, ylow + dylow : yhigh - dyhigh
                     ] |= rotate_grid(b, a.orientation)[
-                         dxlow: (xhigh - xlow) - dxhigh, dylow: (yhigh - ylow) - dyhigh
-                         ]
+                        dxlow : (xhigh - xlow) - dxhigh, dylow : (yhigh - ylow) - dyhigh
+                    ]
 
         # Render the whole grid
         img = self.grid.render(
@@ -834,11 +853,13 @@ class MultiGridEnv(gym.Env):
                 img.shape[0] * agent_col_width_frac - 2 * agent_col_padding_px
             )
             target_partial_height = (
-                                            img.shape[1] - 2 * agent_col_padding_px
-                                    ) // max_agents_per_col
+                img.shape[1] - 2 * agent_col_padding_px
+            ) // max_agents_per_col
 
-            agent_views = [self.gen_agent_obs(agent, agent_index=i) for i, agent in
-                           enumerate(self.agents)]
+            agent_views = [
+                self.gen_agent_obs(agent, agent_index=i)
+                for i, agent in enumerate(self.agents)
+            ]
             agent_views = [
                 view["pov"] if isinstance(view, dict) else view for view in agent_views
             ]
@@ -854,7 +875,7 @@ class MultiGridEnv(gym.Env):
             ]
             # import pdb; pdb.set_trace()
             agent_views = [
-                agent_views[pos: pos + max_agents_per_col]
+                agent_views[pos : pos + max_agents_per_col]
                 for pos in range(0, len(agent_views), max_agents_per_col)
             ]
 
@@ -865,7 +886,7 @@ class MultiGridEnv(gym.Env):
                         target_partial_width - view.shape[0],
                     ]
                 )
-                             // 2
+                // 2
             )
 
             cols = []
@@ -879,9 +900,9 @@ class MultiGridEnv(gym.Env):
                     offset = f_offset(view) + agent_col_padding_px
                     offset[0] += k * target_partial_height
                     col[
-                    offset[0]: offset[0] + view.shape[0],
-                    offset[1]: offset[1] + view.shape[1],
-                    :,
+                        offset[0] : offset[0] + view.shape[0],
+                        offset[1] : offset[1] + view.shape[1],
+                        :,
                     ] = view
                 cols.append(col)
 
