@@ -18,23 +18,24 @@ class GridAgentInterface(GridAgent):
         done = 3  # Done completing task
 
     def __init__(
-        self,
-        view_size=7,
-        view_tile_size=5,
-        view_offset=0,
-        observation_style="image",
-        observe_rewards=False,
-        observe_position=False,
-        see_color_in_view_bool=False,
-        observe_orientation=False,
-        restrict_actions=False,
-        see_through_walls=False,
-        hide_item_types=[],
-        prestige_beta=0.95,
-        prestige_scale=2,
-        allow_negative_prestige=False,
-        spawn_delay=0,
-        **kwargs,
+            self,
+            view_size=7,
+            view_tile_size=5,
+            view_offset=0,
+            observation_style="image",
+            observe_rewards=False,
+            observe_position=False,
+            see_color_in_view_bool=False,
+            observe_orientation=False,
+            restrict_actions=False,
+            see_through_walls=False,
+            hide_item_types=[],
+            prestige_beta=0.95,
+            prestige_scale=2,
+            allow_negative_prestige=False,
+            spawn_delay=0,
+            comm_color_index=0,
+            **kwargs,
     ):
         super().__init__(**kwargs)
 
@@ -54,6 +55,9 @@ class GridAgentInterface(GridAgent):
         self.prestige_scale = prestige_scale
         self.allow_negative_prestige = allow_negative_prestige
         self.spawn_delay = spawn_delay
+
+        # for comm game
+        self.comm_color_index = comm_color_index
 
         if self.prestige_beta > 1:
             # warnings.warn("prestige_beta must be between 0 and 1. Using default 0.99")
@@ -147,6 +151,7 @@ class GridAgentInterface(GridAgent):
             prestige_scale=self.prestige_scale,
             allow_negative_prestige=self.allow_negative_prestige,
             spawn_delay=self.spawn_delay,
+            comm_color_index=self.comm_color_index,
             **self.init_kwargs,
         )
         return ret
@@ -170,6 +175,14 @@ class GridAgentInterface(GridAgent):
 
     def deactivate(self):
         self.active = False
+
+    # For comm game
+    def set_comm_color_index_in_view(self, comm_color_index):
+        self.comm_color_index = comm_color_index
+
+    # For comm game
+    def get_comm_color_index_in_view(self):
+        return self.comm_color_index
 
     def reset(self, new_episode=False):
         self.on_color = None

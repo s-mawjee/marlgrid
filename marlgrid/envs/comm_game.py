@@ -98,8 +98,50 @@ class CommunicationGameEnv(MultiGridEnv):
         obs = self.gen_obs()
         return obs
 
-    def get_color_in_view(self, grid_image):
-        return 0
+    def comm_block_in_view(self, agent, top, bottom, agent_index=-1):
+        # 0 -> no comm color block in view
+        # 1 -> left block (top or bottom)
+        # 2 -> right block (top or bottom)
+
+        if agent_index != -1:
+            comm_color_index = 0
+            if agent_index == 0:
+                # print(agent_index, '->', top, ":", self.comm_blocks_top_coordinates, ":",
+                #       bottom)
+                y_min = max(top[1], 0)
+                y_max = min(bottom[1], (self.height // 2) - 1)
+                x_min = top[0]
+                x_max = bottom[0]
+
+                if x_min <= self.comm_blocks_top_coordinates[0] < x_max:
+                    if y_min <= self.comm_blocks_top_coordinates[1] < y_max:
+                        i = self.goal_blocks_top_index
+                        # 2 or 3 -> 1 or 2
+                        if i == 2:
+                            comm_color_index = 1
+                        elif i == 3:
+                            comm_color_index = 2
+
+            elif agent_index == 1:
+                # print(agent_index, '->', top, ":", self.comm_blocks_bottom_coordinates
+                #  , ":",bottom)
+                y_min = max(top[1], (self.height // 2) + 1)
+                y_max = min(bottom[1], self.height - 1)
+                x_min = top[0]
+                x_max = bottom[0]
+
+                if x_min <= self.comm_blocks_bottom_coordinates[0] < x_max:
+                    if y_min <= self.comm_blocks_bottom_coordinates[1] < y_max:
+                        i = self.goal_blocks_bottom_index
+                        # 0 or 1 -> 1 or 2
+                        if i == 0:
+                            comm_color_index = 1
+                        elif i == 1:
+                            comm_color_index = 2
+            agent.set_comm_color_index_in_view(comm_color_index)
+
+    def check_color_in_view(self, grid_image, agent):
+        return agent.get_comm_color_index_in_view()
 
     def step(self, actions):
         for agent in self.agents:
@@ -226,7 +268,8 @@ class CommunicationGameEnv(MultiGridEnv):
 
                 agent.on_step(fwd_cell if agent_moved else None)
 
-        obs = [self.gen_agent_obs(agent) for agent in self.agents]
+        obs = [self.gen_agent_obs(agent, agent_index=i) for i, agent in
+               enumerate(self.agents)]
 
         # If any of the agents individually are "done" (hit lava or in some cases a goal)
         #   but the env requires respawning, then respawn those agents.

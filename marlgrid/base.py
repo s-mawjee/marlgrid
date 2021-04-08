@@ -432,7 +432,7 @@ class MultiGridEnv(gym.Env):
         obs = self.gen_obs()
         return obs
 
-    def gen_obs_grid(self, agent):
+    def gen_obs_grid(self, agent, agent_index=-1):
         # If the agent is inactive, return an empty grid and a visibility mask that hides everything.
         if not agent.active:
             # below, not sure orientation is correct but as of 6/27/2020 that doesn't matter because
@@ -455,7 +455,8 @@ class MultiGridEnv(gym.Env):
 
         # Warning about the rest of the function:
         #  Allows masking away objects that the agent isn't supposed to see.
-        #  But breaks consistency between the states of the grid objects in the parial views
+        #  But breaks consistency between the states of the
+        #  grid objects in the parial views
         #   and the grid objects overall.
         if len(getattr(agent, "hide_item_types", [])) > 0:
             for i in range(grid.width):
@@ -470,14 +471,20 @@ class MultiGridEnv(gym.Env):
                             grid.set(i, j, item.agents[0])
                         else:
                             grid.set(i, j, None)
+        # for comm game
+        self.comm_block_in_view(agent, (topX, topY), (botX, botY),
+                                agent_index=agent_index)
 
         return grid, vis_mask
 
-    def gen_agent_obs(self, agent):
+    def comm_block_in_view(self, agent, top, bottom, agent_index=-1):
+        pass
+
+    def gen_agent_obs(self, agent, agent_index=-1):
         """
         Generate the agent's view (partially observable, low-resolution encoding)
         """
-        grid, vis_mask = self.gen_obs_grid(agent)
+        grid, vis_mask = self.gen_obs_grid(agent, agent_index=agent_index)
         grid_image = grid.render(
             tile_size=agent.view_tile_size, visible_mask=vis_mask, top_agent=agent
         )
@@ -488,7 +495,7 @@ class MultiGridEnv(gym.Env):
             if agent.observe_rewards:
                 ret["reward"] = getattr(agent, "step_reward", 0)
             if agent.see_color_in_view_bool:
-                ret["see_color_in_view"] = self.get_color_in_view(grid_image)
+                ret["see_color_in_view"] = self.check_color_in_view(grid_image, agent)
             if agent.observe_position:
                 agent_pos = agent.pos if agent.pos is not None else (0, 0)
                 ret["position"] = np.array(agent_pos) / np.array(
@@ -499,7 +506,7 @@ class MultiGridEnv(gym.Env):
                 ret["orientation"] = agent_dir
             return ret
 
-    def get_color_in_view(self, grid_image):
+    def check_color_in_view(self, grid_image, agent):
         # Check if blue hue is max
         if np.any(np.isin(grid_image[:][:][2], [255])):
             return 2
@@ -510,7 +517,8 @@ class MultiGridEnv(gym.Env):
             return 0
 
     def gen_obs(self):
-        return [self.gen_agent_obs(agent) for agent in self.agents]
+        return [self.gen_agent_obs(agent, agent_index=i) for i, agent in
+                enumerate(self.agents)]
 
     def __str__(self):
         return self.grid.__str__()
@@ -693,7 +701,8 @@ class MultiGridEnv(gym.Env):
             [agent.done for agent in self.agents]
         )
 
-        obs = [self.gen_agent_obs(agent) for agent in self.agents]
+        obs = [self.gen_agent_obs(agent, agent_index=i) for i, agent in
+               enumerate(self.agents)]
 
         return obs, step_rewards, done, {}
 
@@ -828,7 +837,8 @@ class MultiGridEnv(gym.Env):
                                             img.shape[1] - 2 * agent_col_padding_px
                                     ) // max_agents_per_col
 
-            agent_views = [self.gen_agent_obs(agent) for agent in self.agents]
+            agent_views = [self.gen_agent_obs(agent, agent_index=i) for i, agent in
+                           enumerate(self.agents)]
             agent_views = [
                 view["pov"] if isinstance(view, dict) else view for view in agent_views
             ]
