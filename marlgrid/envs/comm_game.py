@@ -42,14 +42,8 @@ class CommunicationGameEnv(MultiGridEnv):
 
         for i, (x, y) in enumerate(self.block_coordinates):
             self.put_obj(
-                ColorGoal(
-                    color=self.block_colors[i],
-                    reward=1
-                    if i in [self.goal_blocks_top_index, self.goal_blocks_bottom_index]
-                    else -10,
-                ),
-                x,
-                y,
+                ColorGoal(color=self.block_colors[i], reward=self.__get_goal_reward(i)),
+                x, y,
             )
 
         # TODO: Put hallway/door between agent start and goal coordinates
@@ -61,6 +55,12 @@ class CommunicationGameEnv(MultiGridEnv):
 
         self.agent_spawn_kwargs = {
         }
+
+    def __get_goal_reward(self, goal_index):
+        if goal_index in [self.goal_blocks_top_index, self.goal_blocks_bottom_index]:
+            return 1
+        else:
+            return -10
 
     def __set_random_comm_block_color(self):
         # Want agents to comm the color block there see,
@@ -228,7 +228,7 @@ class CommunicationGameEnv(MultiGridEnv):
                             agent.reward(rwd)
 
                             if isinstance(fwd_cell, ColorGoal):
-                                if rwd < 0:
+                                if rwd != 0:
                                     agent.done = True
 
                 # TODO: verify pickup/drop/toggle logic in an environment that

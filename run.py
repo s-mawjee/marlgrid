@@ -1,3 +1,5 @@
+import random
+
 from marlgrid import envs
 import gym
 import numpy as np
@@ -150,14 +152,25 @@ def main4():
     env_config["agents"] = [p1, p2]
     env = env_from_config(env_config)
 
-    env.seed(22)
+    seed = 22
+    np.random.seed(seed)
+    random.seed(seed)
+    env.seed(seed)
     env.reset()
+    env.render()
+
+    actions = [(0, 2), (2, 2), (2, 2), (2, 2), (2, 2), (0, 1), (2, 2), (2, 2), (1, 2),
+               (1, 2), (1, 2)]
+    actions2 = [(0, 1), (2, 2), (2, 2), (2, 1), (2, 2), (1, 0), (2, 2), (2, 2), (2, 2),
+                (2, 1), (2, 2), (2, 2), (2, 2), (2, 2), (2, 2), (2, 2)]
     print("starting")
-    for _ in range(20):
-        action = env.action_space.sample()
+    for action in actions2:
+        # action = env.action_space.sample()
         obs, reward, done, _ = env.step(action)
+        print()
         env.render()
-        print('obs:', obs[0]['see_color_in_view'], obs[1]['see_color_in_view'])
+        print('obs:', obs[0]['see_color_in_view'], obs[1]['see_color_in_view'],
+              'reward', reward, 'done', done)
         if done:
             break
 
