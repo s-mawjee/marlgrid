@@ -159,18 +159,52 @@ def main4():
     env.reset()
     env.render()
 
-    actions = [(0, 2), (2, 2), (2, 2), (2, 2), (2, 2), (0, 1), (2, 2), (2, 2), (1, 2),
-               (1, 2), (1, 2)]
-    actions2 = [(0, 1), (2, 2), (2, 2), (2, 1), (2, 2), (1, 0), (2, 2), (2, 2), (2, 2),
-                (2, 1), (2, 2), (2, 2), (2, 2), (2, 2), (2, 2), (2, 2)]
+    actions = [
+        (0, 2),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+        (0, 1),
+        (2, 2),
+        (2, 2),
+        (1, 2),
+        (1, 2),
+        (1, 2),
+    ]
+    actions2 = [
+        (0, 1),
+        (2, 2),
+        (2, 2),
+        (2, 1),
+        (2, 2),
+        (1, 0),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+        (2, 1),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+        (2, 2),
+    ]
     print("starting")
     for action in actions2:
         # action = env.action_space.sample()
         obs, reward, done, _ = env.step(action)
         print()
         env.render()
-        print('obs:', obs[0]['see_color_in_view'], obs[1]['see_color_in_view'],
-              'reward', reward, 'done', done)
+        print(
+            "obs:",
+            obs[0]["see_color_in_view"],
+            obs[1]["see_color_in_view"],
+            "reward",
+            reward,
+            "done",
+            done,
+        )
         if done:
             break
 
