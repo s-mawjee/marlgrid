@@ -8,7 +8,7 @@ class CommunicationGameEnv(MultiGridEnv):
     metadata = {}
 
     def __init__(
-        self, *args, block_coordinates, block_colors, comm_blocks_coordinates, **kwargs
+            self, *args, block_coordinates, block_colors, comm_blocks_coordinates, **kwargs
     ):
         assert len(block_coordinates) == 4
         assert len(block_colors) == 4
@@ -29,12 +29,12 @@ class CommunicationGameEnv(MultiGridEnv):
 
         # Add comm-code-blocks to section
         self.put_obj(
-            ColorGoal(color=self.block_colors[self.goal_blocks_top_index], reward=0),
+            ColorGoal(color=self.block_colors[self.goal_blocks_top_index], reward=-1),
             self.comm_blocks_top_coordinates[0],
             self.comm_blocks_top_coordinates[1],
         )
         self.put_obj(
-            ColorGoal(color=self.block_colors[self.goal_blocks_bottom_index], reward=0),
+            ColorGoal(color=self.block_colors[self.goal_blocks_bottom_index], reward=-1),
             self.comm_blocks_bottom_coordinates[0],
             self.comm_blocks_bottom_coordinates[1],
         )
@@ -57,7 +57,7 @@ class CommunicationGameEnv(MultiGridEnv):
 
     def __get_goal_reward(self, goal_index):
         if goal_index in [self.goal_blocks_top_index, self.goal_blocks_bottom_index]:
-            return 1
+            return 10
         else:
             return -10
 
@@ -116,14 +116,14 @@ class CommunicationGameEnv(MultiGridEnv):
                 x_min = top[0]
                 x_max = bottom[0]
 
-                if x_min <= self.comm_blocks_top_coordinates[0] < x_max:
-                    if y_min <= self.comm_blocks_top_coordinates[1] < y_max:
-                        i = self.goal_blocks_top_index
-                        # 2 or 3 -> 1 or 2
-                        if i == 2:
-                            comm_color_index = 1
-                        elif i == 3:
-                            comm_color_index = 2
+                # if x_min <= self.comm_blocks_top_coordinates[0] < x_max:
+                #     if y_min <= self.comm_blocks_top_coordinates[1] < y_max:
+                i = self.goal_blocks_top_index
+                # 2 or 3 -> 1 or 2
+                if i == 2:
+                    comm_color_index = 1
+                elif i == 3:
+                    comm_color_index = 2
 
             elif agent_index == 1:
                 # print(agent_index, '->', top, ":", self.comm_blocks_bottom_coordinates
@@ -133,14 +133,14 @@ class CommunicationGameEnv(MultiGridEnv):
                 x_min = top[0]
                 x_max = bottom[0]
 
-                if x_min <= self.comm_blocks_bottom_coordinates[0] < x_max:
-                    if y_min <= self.comm_blocks_bottom_coordinates[1] < y_max:
-                        i = self.goal_blocks_bottom_index
-                        # 0 or 1 -> 1 or 2
-                        if i == 0:
-                            comm_color_index = 1
-                        elif i == 1:
-                            comm_color_index = 2
+                # if x_min <= self.comm_blocks_bottom_coordinates[0] < x_max:
+                #     if y_min <= self.comm_blocks_bottom_coordinates[1] < y_max:
+                i = self.goal_blocks_bottom_index
+                # 0 or 1 -> 1 or 2
+                if i == 0:
+                    comm_color_index = 1
+                elif i == 1:
+                    comm_color_index = 2
             agent.set_comm_color_index_in_view(comm_color_index)
 
     def check_color_in_view(self, grid_image, agent):
@@ -149,23 +149,16 @@ class CommunicationGameEnv(MultiGridEnv):
     def step(self, actions):
         for agent in self.agents:
             if (
-                not agent.active
-                and not agent.done
-                and self.step_count >= agent.spawn_delay
+                    not agent.active
+                    and not agent.done
+                    and self.step_count >= agent.spawn_delay
             ):
                 self.place_obj(agent, **self.agent_spawn_kwargs)
                 agent.activate()
 
         assert len(actions) == len(self.agents)
 
-        step_rewards = np.zeros(
-            (
-                len(
-                    self.agents,
-                )
-            ),
-            dtype=np.float,
-        )
+        step_rewards = np.zeros((len(self.agents),), dtype=np.float)
 
         self.step_count += 1
 
@@ -175,6 +168,10 @@ class CommunicationGameEnv(MultiGridEnv):
         for shuffled_ix in iter_order:
             agent_no, (agent, action) = iter_agents[shuffled_ix]
             agent.step_reward = 0
+
+            step_reward = -1
+            step_rewards[agent_no] += step_reward
+            agent.reward(step_reward)
 
             if agent.active:
 
@@ -232,13 +229,17 @@ class CommunicationGameEnv(MultiGridEnv):
                         # Rewards can be got iff. fwd_cell has a "get_reward" method
                         if hasattr(fwd_cell, "get_reward"):
                             rwd = fwd_cell.get_reward(agent)
+                            full_rwd = rwd
                             if bool(self.reward_decay):
                                 rwd *= 1.0 - 0.9 * (self.step_count / self.max_steps)
+
+                            # due to step reward
+                            rwd += 1
                             step_rewards[agent_no] += rwd
                             agent.reward(rwd)
 
                             if isinstance(fwd_cell, ColorGoal):
-                                if rwd != 0:
+                                if full_rwd != -1:
                                     agent.done = True
 
                 # TODO: verify pickup/drop/toggle logic in an environment that
@@ -307,8 +308,6 @@ class CommunicationGameEnv(MultiGridEnv):
                     agent.deactivate()
 
         # The episode overall is done if all the agents are done, or if it exceeds the step limit.
-        done = (self.step_count >= self.max_steps) or all(
-            [agent.done for agent in self.agents]
-        )
+        done = (self.step_count >= self.max_steps) or all([agent.done for agent in self.agents])
 
         return obs, step_rewards, done, {}
